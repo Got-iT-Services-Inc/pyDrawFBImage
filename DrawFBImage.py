@@ -17,6 +17,58 @@ from Debug import pyDebugger
 
 class pyDrawFBImage():
 
+   class pySprite(pygame.sprite.Sprite):
+
+      def __init__(self,sImg="",sColor=(0,0,0),sRect=(0,0,0,0)):
+         super().__init__()
+         self.imgLoc = sImg
+         self.color = sColor
+         self.rect = None
+         print ("pySprite: sRect: " + str(self.rect))
+         self.update(sRect)
+
+      def update(self,sLocation=(0,0)):
+         if self.imgLoc != "":
+            self.image = pygame.image.load(self.imgLoc).convert()
+            rTmp = self.image.get_rect().size
+            self.rect = (sLocation[0],sLocation[1],sLocation[0] + rTmp[0], sLocation[1] + rTmp[1])
+         else:
+            self.image = pygame.Surface(self.rect)
+            self.image.fill(self.color)
+            rTmp = self.image.get_rect().size()
+            self.rect = (sLocation[0],sLocation[1],sLocation[0] + rTmp[0], sLocation[1] + rTmp[1])
+         self.rect = pygame.Rect(self.rect)
+
+
+   class pyText(pygame.sprite.Sprite):
+
+      def __init__(self,dScreen,rLocation,sText,sSize,cColor,sFont="Arial",bCenter=True,bAntialias=True,
+        OffSet=(0,0),bBold=False):
+         #self.Debugger = pyDebugger(self,True,False)
+         #self.Debugger.Log("Initializing Text Sprite...\n  *Text: " + sText + "\n  *Size: " + str(sSize) +
+         #   "\n  *Color: " + str(cColor) + "\n  *Font: " + sFont + "\n  *Location: " + str(rLocation[0]) +
+         #   "(W) " + str(rLocation[1]) + "(H)")
+         super().__init__()
+         self.font = pygame.font.SysFont(sFont, sSize,bold=bBold)
+         self.color = cColor
+         self.text = sText
+         self.pos = rLocation
+         self.screen = dScreen
+         self.offset = OffSet
+         self.antialias = bAntialias
+         self.center = bCenter
+         self.update()
+
+      def update(self):
+         self.image = self.font.render(self.text, self.antialias, self.color)
+         self.rect = self.image.get_rect()
+         if self.center == True:
+            self.rect.x = (self.pos[0]/2) - (self.rect.width/2) + self.offset[0]
+            self.rect.y = (self.pos[1]/2) - (self.rect.height/2) + self.offset[1]
+         else:
+            self.rect.x = self.pos[0] + self.offset[0]
+            self.rect.y = self.pos[1] + self.offset[1]
+
    def __init__(self):
       self.Debugger = pyDebugger(self,True,False)
       self.Debugger.Log("Starting pyDrawFBImage...For drawing to framebuffer devices...")
@@ -33,6 +85,10 @@ class pyDrawFBImage():
          self.Debugger.Log("Screen set...")
          self.Debugger.Log("Initializing font module...")
          pygame.font.init()
+         self.All_Sprites = pygame.sprite.Group()
+         self.gBackground = None
+         self.clock = pygame.time.Clock()
+         self.clock.tick(1)
 
    def CheckDisplay(self):
       disp_no = os.getenv('DISPLAY')
@@ -67,14 +123,29 @@ class pyDrawFBImage():
          else:
             return True
 
-   def DrawImg(self, ImgPath):
-      self.Debugger.Log("Loading Image...", endd="")
-      self.Img = pygame.image.load(ImgPath)
+
+   def DrawBackgroundImg(self, ImgPath, bUpdateScreen = True):
+      self.Debugger.Log("Loading Background Image...", endd="")
+      try:
+         self.gBackground = pygame.image.load(ImgPath)
+      except Exception as e:
+         self.Debugger.Log("Failed!")
+         self.Debugger.Log(str(e))
+         return False
       self.Debugger.Log("Success!")
-      self.ImgRect = self.Img.get_rect()
-      self.Debugger.Log("Image Attributes (" + str(self.ImgRect) + ")")
-      self.FBScreen.blit(self.Img, self.ImgRect)
-      pygame.display.flip()
+      self.Debugger.Log("Background Image Attributes (" + str(self.gBackground.get_rect()) + ")")
+      self.FBScreen.blit(self.gBackground, self.gBackground.get_rect())
+      if bUpdateScreen:
+         pygame.display.flip()
+
+   def DrawImg(self, ImgPath,sLocation=(0,0)):
+      self.Debugger.Log("Loading Image...", endd="")
+      iTmp = pygame.image.load(ImgPath)
+      iTmp.x = sLocation[0]
+      iTmp.y = sLocation[0]
+      self.All_Sprites.add(iTmp)
+      iTmp.draw()
+      self.Debugger.Log("Success!")
 
    def DrawText(self, sText,rLocation=(300,300), sFont="monospace",iFontSize=15,iColor=(255,255,255),vCenter=False,hCenter=False,bClear=False):
       pyGFont = pygame.font.SysFont(sFont,iFontSize)
@@ -88,8 +159,18 @@ class pyDrawFBImage():
       self.FBScreen.blit(lblText,rLocation)
       pygame.display.flip()
 
-   def FillScreen(self, sColor):
-      self.FBScreen.fill(sColor)
+   def FillSurface(self,sSize, sColor):
+      sTmp = pygame.Surface(sSize)
+      sTmp.fill(sColor)
+      return sTmp
+
+   def Update(self):
+      if self.gBackground != None:
+         self.FBScreen.blit(self.gBackground, self.gBackground.get_rect())
+         
+      self.All_Sprites.draw(self.FBScreen)
+      #self.Debugger.Log("Count" + str(len(self.All_Sprites)))
+      #pygame.display.flip()
 
 
 
