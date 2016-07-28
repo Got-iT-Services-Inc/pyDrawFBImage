@@ -24,7 +24,7 @@ class pyDrawFBImage():
          self.imgLoc = sImg
          self.color = sColor
          self.rect = None
-         print ("pySprite: sRect: " + str(self.rect))
+         #print ("pySprite: sRect: " + str(self.rect))
          self.update(sRect)
 
       def update(self,sLocation=(0,0)):
@@ -85,7 +85,7 @@ class pyDrawFBImage():
          self.Debugger.Log("Screen set...")
          self.Debugger.Log("Initializing font module...")
          pygame.font.init()
-         self.All_Sprites = pygame.sprite.Group()
+         self.ClearAllSprites()
          self.gBackground = None
          self.MOUSEBUTTONUP = pygame.MOUSEBUTTONUP
          self.clock = pygame.time.Clock()
@@ -124,6 +124,8 @@ class pyDrawFBImage():
          else:
             return True
 
+   def ClearAllSprites(self):
+      self.All_Sprites = pygame.sprite.Group()
 
    def DrawBackgroundImg(self, ImgPath, bUpdateScreen = True):
       self.Debugger.Log("Loading Background Image...", endd="")
@@ -163,15 +165,18 @@ class pyDrawFBImage():
    def FillSurface(self,sSize, sColor):
       sTmp = pygame.Surface(sSize)
       sTmp.fill(sColor)
+      self.Debugger.Log("Creates Surface of Size '" + str(sSize) + "' and color '" + str(sColor) + "'")
       return sTmp
 
-   def Update(self):
+   def Update(self,bAll=False):
       if self.gBackground != None:
+         self.Debugger.Log("Updating Background...")
          self.FBScreen.blit(self.gBackground, self.gBackground.get_rect())
 
       self.All_Sprites.draw(self.FBScreen)
       #self.Debugger.Log("Count" + str(len(self.All_Sprites)))
-      #pygame.display.flip()
+      if bAll == True:
+         pygame.display.flip()
 
    def getEvents(self):
       eEvent = None
