@@ -43,7 +43,7 @@ class pyDrawFBImage():
    class pyText(pygame.sprite.Sprite):
 
       def __init__(self,dScreen,rLocation,sText,sSize,cColor,sFont="Arial",bCenter=True,bAntialias=True,
-        OffSet=(0,0),bBold=False):
+        Offset=(0,0),bBold=False):
          #self.Debugger = pyDebugger(self,True,False)
          #self.Debugger.Log("Initializing Text Sprite...\n  *Text: " + sText + "\n  *Size: " + str(sSize) +
          #   "\n  *Color: " + str(cColor) + "\n  *Font: " + sFont + "\n  *Location: " + str(rLocation[0]) +
@@ -54,7 +54,7 @@ class pyDrawFBImage():
          self.text = sText
          self.pos = rLocation
          self.screen = dScreen
-         self.offset = OffSet
+         self.offset = Offset
          self.antialias = bAntialias
          self.center = bCenter
          self.update()
@@ -87,6 +87,7 @@ class pyDrawFBImage():
          pygame.font.init()
          self.All_Sprites = pygame.sprite.Group()
          self.gBackground = None
+         self.MOUSEBUTTONUP = pygame.MOUSEBUTTONUP
          self.clock = pygame.time.Clock()
          self.clock.tick(1)
 
@@ -155,7 +156,7 @@ class pyDrawFBImage():
       if hCenter:
          rLocation = ((self.FBSize[0] / 2) - (lblText.get_rect().width / 2), rLocation[1])
       #if bClear:
-      
+
       self.FBScreen.blit(lblText,rLocation)
       pygame.display.flip()
 
@@ -167,11 +168,27 @@ class pyDrawFBImage():
    def Update(self):
       if self.gBackground != None:
          self.FBScreen.blit(self.gBackground, self.gBackground.get_rect())
-         
+
       self.All_Sprites.draw(self.FBScreen)
       #self.Debugger.Log("Count" + str(len(self.All_Sprites)))
       #pygame.display.flip()
 
+   def getEvents(self):
+      eEvent = None
+      eEvent = pygame.event.get()
+      return eEvent
+
+   def getMousePos(self):
+      tPos = pygame.mouse.get_pos()
+      mPos = (tPos[0] + 100, tPos[1] + 275)
+      return mPos
+
+   def CheckHits(self,MousePos):
+      tSprites = [s for s in self.All_Sprites if s.rect.collidepoint(MousePos)]
+      return tSprites
+
+   def ShowMouse(self,bShow=True):
+      pygame.mouse.set_visible(bShow)
 
 
 if __name__ == '__main__':
