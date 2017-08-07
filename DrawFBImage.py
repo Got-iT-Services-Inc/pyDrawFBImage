@@ -31,6 +31,8 @@ class pyDrawFBImage():
          self.Debugger.Log("Size of display set w(" + str(self.FBSize[0]) + "), h(" + str(self.FBSize[1]) + ")...")
          self.FBScreen = pygame.display.set_mode(self.FBSize, pygame.FULLSCREEN)
          self.Debugger.Log("Screen set...")
+         self.Debugger.Log("Initializing font module...")
+         pygame.font.init()
 
    def CheckDisplay(self):
       disp_no = os.getenv('DISPLAY')
@@ -72,6 +74,18 @@ class pyDrawFBImage():
       self.ImgRect = self.Img.get_rect()
       self.Debugger.Log("Image Attributes (" + str(self.ImgRect) + ")")
       self.FBScreen.blit(self.Img, self.ImgRect)
+      pygame.display.flip()
+
+   def DrawText(self, sText,rLocation=(300,300), sFont="monospace",iFontSize=15,iColor=(255,255,255),vCenter=False,hCenter=False,bClear=False):
+      pyGFont = pygame.font.SysFont(sFont,iFontSize)
+      lblText = pyGFont.render(sText,1,iColor)
+      if vCenter:
+         rLocation = (rLocation[0], (self.FBSize[1] / 2) - (lblText.get_rect().height / 2))
+      if hCenter:
+         rLocation = ((self.FBSize[0] / 2) - (lblText.get_rect().width / 2), rLocation[1])
+      #if bClear:
+      
+      self.FBScreen.blit(lblText,rLocation)
       pygame.display.flip()
 
    def FillScreen(self, sColor):
